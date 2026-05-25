@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>새 포스트 작성</title>
+</head>
+<body>
+    <h1>새 포스트 작성</h1>
+
+    <form method="POST" action="/posts/post_add/" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">공유하기</button>
+    </form>
+    <br>
+    <a href="/posts/feeds/">취소하고 피드로 돌아가기</a>
+</body>
+</html>
