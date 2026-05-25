@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <h1 style="margin: 0; font-size: 24px;">
+        <a href="/posts/feeds/" style="text-decoration: none; color: #000; font-family: 'Grand Hotel', cursive;">Pystagram</a>
+    </h1>
+    <a href="/users/logout/" style="text-decoration: none; color: #007bff; font-weight: bold;">Logout</a>
+</nav>
+
+<div id="feeds" class="post-container" style="max-width: 600px; margin: 30px auto; padding: 0 10px;">
+    {% for post in posts %}
+        <article class="post" style="background: #fff; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 30px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+            <header class="post-header" style="display: flex; align-items: center; padding: 16px; border-bottom: 1px solid #fafafa;">
+                {% if post.user.profile_image %}
+                    <img src="{{ post.user.profile_image.url }}" style="width: 36px; height: 36px; border-radius: 50%; margin-right: 12px; object-fit: cover; display: block;">
+                {% else %}
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #dbdbdb; margin-right: 12px;"></div>
+                {% endif %}
+                <span style="font-weight: bold; color: #262626; font-size: 15px;">{{ post.user.username }}</span>
+            </header>
+
+            <div class="post-image-container" style="width: 100%; background: #fafafa; overflow: hidden; border-bottom: 1px solid #efefef;">
+                {% if post.post_image %}
+                    <img src="{{ post.post_image.url }}" alt="포스트 이미지" style="width: 100%; height: auto; aspect-ratio: 1/1; object-fit: cover; display: block;">
+                {% endif %}
+            </div>
+
+            <div class="post-buttons" style="padding: 14px 16px 0 16px; display: flex; gap: 16px;">
+                <button style="background: none; border: none; padding: 0; font-weight: bold; cursor: pointer; color: #262626;">Likes (0)</button>
+                <span style="font-weight: bold; color: #262626;">Comments (0)</span>
+            </div>
+
+            <div class="post-content" style="padding: 12px 16px; color: #262626; font-size: 14px; line-height: 1.5;">
+                <span style="font-weight: bold; margin-right: 8px;">{{ post.user.username }}</span>
+                {{ post.content|linebreaksbr }}
+            </div>
+
+            <small style="padding: 0 16px; color: #8e8e8e; font-size: 10px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{{ post.created_at }}</small>
+
+            <div class="post-comment-create" style="display: flex; border-top: 1px solid #efefef; padding: 14px 16px;">
+                <input type="text" placeholder="댓글 달기..." style="flex: 1; border: none; outline: none; font-size: 14px;">
+                <button type="submit" style="background: none; border: none; color: #0095f6; font-weight: bold; cursor: pointer;">게시</button>
+            </div>
+
+        </article>
+    {% endfor %}
+</div>
+{% endblock %}
