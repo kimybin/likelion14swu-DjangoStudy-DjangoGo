@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <nav>
+        <h1>
+            <a href="/posts/feeds/">Pystagram</a>
+        </h1>
+        <a href="/users/logout/">Logout</a>
+    </nav>
+    <div id="post-add">
+        <h1>Add Post</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div>
+                <lable for="id-images">images</lable>
+                <input id="id_images" name="images" type="file" multiple>
+            </div>
+            {{ form.as_p }}
+            <button type="submit">post</button>
+        </form>
+    </div>
+{% endblock %}
