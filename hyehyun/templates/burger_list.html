@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>pyburger's burger list</h1>
+    {% for burger in burgers %}
+        <div>
+            {{ burger.name }}
+            (price: {{ burger.price }})
+            calories: {{ burger.calories }}
+        </div>
+    {% endfor %}
+</body>
+</html>
