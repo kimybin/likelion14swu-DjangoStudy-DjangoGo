@@ -4,9 +4,9 @@
 
     <nav>
         <h1>
-            <a href="/posts/feeds/">Pystagram</a>
+            <a href="{% url 'posts:feeds' %}">Pystagram</a>
         </h1>
-        <a href="/users/logout/">Logout</a>
+        <a href="{% url 'users:logout' %}">Logout</a>
     </nav>
     <div id="post-add">
         <h1>Add Post</h1>
@@ -17,7 +17,11 @@
                 <input id="id_images" name="images" type="file" multiple>
             </div>
             {{ form.as_p }}
-            <button type="submit">post</button>
+            <div>
+                <label for="id_tags">해시태그</label>
+                <input id="id_tags" name="tags"
+                       type="text" placeholder="쉼표로 구분하여 여러 태그 입력">
+            </div>
         </form>
     </div>
 {% endblock %}
