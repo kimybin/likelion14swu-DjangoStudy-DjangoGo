@@ -24,6 +24,12 @@ class InlineImageWidget(AdminFileWidget):
             html = mark_safe(f'<img src="{value.url}" height="150">') + html
         return html
 
+class LikeUserInline(admin.TabularInline):
+    model = Post.like_users.through
+    verbose_name = "좋아요 한 User"
+    verbose_name_plural = f"{verbose_name} 목록"
+    extra = 1
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = [
@@ -33,6 +39,7 @@ class PostAdmin(admin.ModelAdmin):
     inlines = [
         CommentInline,
         PostImageInline,
+        LikeUserInline,
     ]
     formfield_overrides = {
         ManyToManyField: {'widget': CheckboxSelectMultiple},
@@ -57,3 +64,4 @@ class CommentAdmin(admin.ModelAdmin):
 @admin.register(HashTag)
 class HasTagAdmin(admin.ModelAdmin):
     pass
+

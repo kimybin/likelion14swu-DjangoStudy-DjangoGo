@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from posts.models import Post, Comment, PostImage, HashTag
 from posts.forms import CommentForm, PostForm
 from django.views.decorators.http import require_POST
@@ -15,6 +15,7 @@ def feeds(request):
     context = {
         "posts": posts,
         "comment_form": comment_form,
+        "action_redirect_url": request.path,
     }
 
     return render(request, "posts/feeds.html", context)
@@ -29,12 +30,13 @@ def comment_add(request):
 
         comment.save()
 
-        print(comment.id)
-        print(comment.content)
-        print(comment.user)
+        if request.GET.get("next"):
+            url_next = request.GET.get("next")
 
-        url = reverse("posts:feeds")+f"#post-{comment.post.id}"
-        return HttpResponseRedirect(url)
+        else:
+            url_next = reverse("posts:feeds") + f"#post-{comment.post.id}"
+
+        return HttpResponseRedirect(url_next)
 
 @require_POST
 def comment_delete(request, comment_id):
@@ -42,7 +44,7 @@ def comment_delete(request, comment_id):
         comment = Comment.objects.get(id=comment_id)
         if comment.user == request.user:
             comment.delete()
-            url = reverse("posts:feeds")+f"#post-{comment.post.id}"
+            url = request.GET.get("next") or reverse("posts:feeds") + f"#post-{comment.post.id}"
             return HttpResponseRedirect(url)
         else:
             return HttpResponseForbidden("이 댓글을 삭제할 권한이 없습니다.")
@@ -90,3 +92,30 @@ def tags(request, tag_name):
         "posts": posts,
     }
     return render(request, 'posts/tags.html', context)
+
+def post_detail(request, post_id):
+    if not request.user.is_authenticated:
+        return redirect("users:login")
+
+    post = Post.objects.get(id=post_id)
+    comment_form = CommentForm()
+    context = {
+        "post": post,
+        "comment_form": comment_form,
+        "action_redirect_url": request.path,
+    }
+    return render(request, "posts/post_detail.html", context)
+
+def post_like(request, post_id):
+    post = Post.objects.get(id=post_id)
+    user = request.user
+
+    if user.like_posts.filter(id=post.id).exists():
+        user.like_posts.remove(post)
+
+    else:
+        user.like_posts.add(post)
+
+    url_next = request.GET.get("next") or reverse("posts:feeds") + f"#post-{post.id}"
+    return HttpResponseRedirect(url_next)
+

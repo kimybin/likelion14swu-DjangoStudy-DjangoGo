@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 from users.forms import LoginForm, SignupForm
 from users.models import User
 
@@ -51,3 +54,41 @@ def signup(request):
 
     context = {"form": form}
     return render(request, "users/signup.html", context)
+
+def profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    context = {"user": user}
+    return render(request, "users/profile.html", context)
+
+def followers(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    relationships = user.follower_relationships.all()
+    context = {
+        "user": user,
+        "relationships": relationships,
+    }
+    return render(request, "users/followers.html", context)
+
+def following(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    relationships = user.following_relationships.all()
+    context = {
+        "user": user,
+        "relationships": relationships,
+    }
+    return render(request, "users/following.html", context)
+
+@require_POST
+def follow(request, user_id):
+    user = request.user
+
+    target_user = get_object_or_404(User, id=user_id)
+
+    if target_user in user.following.all():
+        user.following.remove(target_user)
+
+    else:
+        user.following.add(target_user)
+
+    url_next = request.GET.get("next") or reverse("users:profile", args=[user_id])
+    return HttpResponseRedirect(url_next)
