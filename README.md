@@ -27,6 +27,7 @@
 - 스터디 담당자를 정해 매주 돌아가면서 발표 준비
 - 스터디 날짜 전까지 예습 및 실습 
 - 참고 자료
+  
 https://www.aladin.co.kr/shop/wproduct.aspx?itemid=311383694&srsltid=afmboopco8vjc8wgk3dy38n04t_5dtr8ywenvdfhqewpqozlw1o8agvw
 
 
