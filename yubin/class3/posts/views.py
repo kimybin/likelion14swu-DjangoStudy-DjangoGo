@@ -1,5 +1,3 @@
-from importlib.metadata import requires
-
 from django.http import (
     HttpResponseBadRequest,
     HttpResponseRedirect,
@@ -29,29 +27,23 @@ def feeds(request):
 # 댓글 작성을 처리할 View
 def comment_add(request):
     if request.method == "GET":
-        # 이 View에 GET 요청이 전달되면, 잘못된 요청임을 브라우저에 알려줌
         return HttpResponseBadRequest()
 
-    # request.POST로 전달된 데이터를 사용해 CommentForm인스턴스를 생성
     form = CommentForm(data=request.POST)
     if form.is_valid():
-        # commit=False옵션으로 메모리상에 Comment객체 생성
         comment = form.save(commit=False)
 
-        # Comment생성에 필요한 사용자정보를 request에서 가져와 할당
         comment.user = request.user
 
-        # DB에 Comment객체 저장
         comment.save()
 
-        # 생성된 Comment의 정보 확인
-        print(comment.id)
-        print(comment.content)
-        print(comment.user)
+        if request.GET.get("next"):
+            url_next = request.GET.get("next")
 
-        # 생성한 comment에서 연결된 post정보를 가져와서 id값을 사용
-        url = reverse("posts:feeds") + f"#post-{comment.post.id}"
-        return HttpResponseRedirect(url)
+        else:
+            url_next = reverse("posts:feeds") + f"#post-{comment.post.id}"
+
+        return HttpResponseRedirect(url_next)
 
 
 def comment_delete(request, comment_id):
@@ -64,32 +56,24 @@ def comment_delete(request, comment_id):
         else:
             return HttpResponseForbidden("이 댓글을 삭제할 권한이 없습니다")
     else:
-        # 이 View에 오는 GET요청은 잘못되었다고 브라우저에 돌려준다
         return HttpResponseBadRequest()
 
 
 def post_add(request):
     if request.method == "POST":
-        # request.POST로 온 데이터 ("content")는 PostForm으로 처리
         form = PostForm(request.POST)
 
         if form.is_valid():
-            # Post의 "user"값은 request에서 가져와 자동할당한다
             post = form.save(commit=False)
             post.user = request.user
             post.save()
 
-            # Post를 생성 한 후
-            # request.FILES.getlist("images")로 전송된 이미지들을 순회하며 PostImage객체를 생성한다
             for image_file in request.FILES.getlist("images"):
-                # request.FILES또는 request.FILES.getlist()로 가져온 파일은
-                # Model의 ImageField부분에 곧바로 할당한다
                 PostImage.objects.create(
                     post=post,
                     photo=image_file,
                 )
 
-            # "tags"에 전달 된 문자열을 분리해 HashTag생성
             tag_string = request.POST.get("tags")
             if tag_string:
                 tag_name_list = [tag_name.strip() for tag_name in tag_string.split(",")]
@@ -97,15 +81,11 @@ def post_add(request):
                     tag, _ = HashTag.objects.get_or_create(
                         name=tag_name,
                     )
-                    # get_or_create로 생성하거나 가져온 HashTag객체를 Post의 tags에 추가한다
                     post.tags.add(tag)
 
-            # 모든 PostImage와 Post의 생성이 완료되면
-            # 피드페이지로 이동하여 생성된 Post의 위치로 스크롤되도록 한다
             url = reverse("posts:feeds") + f"#post-{post.id}"
             return HttpResponseRedirect(url)
 
-    # GET요청일 때는 빈 form을 보여주도록한다
     else:
         form = PostForm()
 
@@ -117,15 +97,36 @@ def tags(request, tag_name):
     try:
         tag = HashTag.objects.get(name=tag_name)
     except HashTag.DoesNotExist:
-        # tag_name에 해당하는 HashTag를 찾지 못한 경우 빈 QuerySet을 돌려준다
         posts = Post.objects.none()
     else:
         posts = Post.objects.filter(tags=tag)
 
-    # context로 Template에 필터링 된 Post QuerySet을 넘겨주며,
-    # 어떤 tag_name으로 검색했는지도 넘겨준다
     context = {
         "tag_name": tag_name,
         "posts": posts,
     }
     return render(request, "posts/tags.html", context)
+
+
+def post_detail(request, post_id):
+    post = Post.objects.get(id=post_id)
+    comment_form = CommentForm()
+    context = {
+        "post": post,
+        "comment_form": comment_form,
+    }
+    return render(request, "posts/post_detail.html", context)
+
+
+def post_like(request, post_id):
+    post = Post.objects.get(id=post_id)
+    user = request.user
+
+    if user.like_posts.filter(id=post.id).exists():
+        user.like_posts.remove(post)
+
+    else:
+        user.like_posts.add(post)
+
+    url_next = request.GET.get("next") or reverse("posts:feeds") + f"#post-{post.id}"
+    return HttpResponseRedirect(url_next)

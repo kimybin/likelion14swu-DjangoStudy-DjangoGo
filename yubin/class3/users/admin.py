@@ -4,6 +4,20 @@ from django.contrib.auth.admin import UserAdmin
 from users.models import User
 
 
+class FollowersInline(admin.TabularInline):
+    model = User.following.through
+    fk_name = "from_user"
+    verbose_name = "내가 팔로우 하고 있는 사용자"
+    verbose_name_plural = f"{verbose_name} 목록"
+
+
+class FollowingInline(admin.TabularInline):
+    model = User.following.through
+    fk_name = "to_user"
+    verbose_name = "나를 팔로우 하고 있는 사용자"
+    verbose_name_plural = f"{verbose_name} 목록"
+
+
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     fieldsets = [
@@ -18,6 +32,12 @@ class CustomUserAdmin(UserAdmin):
             "추가필드",
             {
                 "fields": ("profile_image", "short_description"),
+            },
+        ),
+        (
+            "연관객체",
+            {
+                "fields": ("like_posts",),
             },
         ),
         (
@@ -39,4 +59,8 @@ class CustomUserAdmin(UserAdmin):
                 )
             },
         ),
+    ]
+    inlines = [
+        FollowersInline,
+        FollowingInline,
     ]

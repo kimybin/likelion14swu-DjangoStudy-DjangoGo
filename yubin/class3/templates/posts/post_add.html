@@ -5,7 +5,6 @@
     <h1>
         <a href="{% url 'posts:feeds' %}">Pystagram</a>
     </h1>
-    <!-- 로그아웃 링크도 함께 추가 -->
     <a href="{% url 'users:logout' %}">Logout</a>
 </nav>
 <div id="container">
@@ -14,7 +13,7 @@
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div>
-                <!-- label의 for 속성에는 가리키는 input의 id값을 입력 -->
+                <!-- label의 for 속성에는 가리키는 input의 id 값을 입력 -->
                 <label for="id_images">이미지</label>
                 <input id="id_images" name="images" type="file" multiple>
             </div>
